@@ -1,3 +1,4 @@
+from sqlalchemy.ext.serializer import loads, dumps
 from src.models import Manufacturer, Car, Color
 from src.database import db_session as session
 

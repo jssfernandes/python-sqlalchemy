@@ -1,25 +1,5 @@
-import src.database as db
 import json
-
-
-# usando para o relacionamento relacionamento de tabelas muitos para muitos entre as tabelas car e color
-car_color = db.Table(
-    'car_color',
-    db.Model.metadata,
-    # db.declarative_base().metadata,
-    db.Column(
-        'car_id',
-        db.Integer,
-        db.ForeignKey('car.id'),
-        primary_key=True
-    ),
-    db.Column(
-        'color_id',
-        db.Integer,
-        db.ForeignKey('color.id'),
-        primary_key=True
-    )
-)
+import src.database as db
 
 
 class Manufacturer(db.Model):
@@ -28,10 +8,6 @@ class Manufacturer(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement="auto")
     name = db.Column(db.String(99))
     founded = db.Column(db.Date)
-
-    # def __init__(self, name, founded):
-    #     self.name = name
-    #     self.founded = founded
 
     def to_json(self):
         return json.dumps(
@@ -44,13 +20,6 @@ class Manufacturer(db.Model):
             # indent=4,
         )
 
-    # @property
-    # def __eq__(self, other):
-    #     return type(self) is type(other) and self.id == other.id
-    #
-    # def __ne__(self, other):
-    #     return not self.__eq__(other)
-
 
 class Color(db.Model):
     __tablename__ = 'color'
@@ -61,20 +30,9 @@ class Color(db.Model):
     # usando o Relationships para relacionamento de tabelas muitos para muitos com a tabela car
     cars = db.relationship(
         "Car",
-        secondary=car_color,
+        secondary='car_color',
         back_populates="colors"
     )
-    # OUTRA FORMA DE RELACIONAMENTOS
-    # cars = db.relationship(
-    #     "Car",
-    #     secondary=car_color,
-    #     # back_populates="colors",
-    #     backref='colors',
-    #     lazy='dynamic',
-    # )
-
-    # def __init__(self, color):
-    #     self.color = color
 
     def to_json(self):
         return json.dumps(
@@ -86,13 +44,6 @@ class Color(db.Model):
             , sort_keys=True, default=str,
             # indent=4,
         )
-
-    # @property
-    # def __eq__(self, other):
-    #     return type(self) is type(other) and self.id == other.id
-    #
-    # def __ne__(self, other):
-    #     return not self.__eq__(other)
 
 
 class Car(db.Model):
@@ -109,23 +60,12 @@ class Car(db.Model):
     # usando o Relationships para relacionamento de tabelas muitos para muitos com a tabela color
     colors = db.relationship(
         "Color",
-        secondary=car_color,
+        secondary='car_color',
         back_populates="cars"
     )
-    # OUTRA FORMA DE RELACIONAMENTOS
-    # _colors = db.relationship(
-    #     "Color",
-    #     secondary=car_color,
-    #     # back_populates="cars",
-    #     backref=db.backref('car_color_backref', lazy='dynamic')
-    # )
 
-    # def __init__(self, model, year_manufacture, country_origin, engine_power, manufacturer):
-    #     self.model = model
-    #     self.year_manufacture = year_manufacture
-    #     self.country_origin = country_origin
-    #     self.engine_power = engine_power
-    #     self.manufacturer = manufacturer
+    def as_dict(self):
+        return {c.name: str(getattr(self, c.name)) for c in self.__table__.columns}
 
     def to_json(self):
         return json.dumps(
@@ -142,43 +82,13 @@ class Car(db.Model):
             # indent=4,
         )
 
-    # @property
-    # def __eq__(self, other):
-    #     return type(self) is type(other) and self.id == other.id
-    #
-    # def __ne__(self, other):
-    #     return not self.__eq__(other)
 
-
-# class CarColor(db.Model):
-#     __tablename__ = "car_color"
-#     car_id = db.Column(db.ForeignKey(Car.id), primary_key=True)
-#     color_id = db.Column(db.ForeignKey(Color.id), primary_key=True)
-#
-#     # usando o Relationships para relacionamento de tabelas, no caso esse relacionamento se trata do Many to Many
-#     car = db.relationship(Car)
-#     color = db.relationship(Color)
-#
-#     # def __init__(self, car, color):
-#     #     self.car = car
-#     #     self.color = color
-#
-#     def to_json(self):
-#         return json.dumps(
-#             dict(
-#                 car=json.loads(self.car.to_json()),
-#                 color=json.loads(self.color.to_json()),
-#             )
-#             , sort_keys=True, default=str,
-#             # indent=4,
-#         )
-#
-#     @property
-#     def __eq__(self, other):
-#         return type(self) is type(other) and self.id == other.id
-#
-#     def __ne__(self, other):
-#         return not self.__eq__(other)
+# objeto criado para os relacionamentos entre as tabelas do tipo Many to Many
+# usando para o relacionamento relacionamento de tabelas muitos para muitos entre as tabelas car e color
+class CarColor(db.Model):
+    __tablename__ = "car_color"
+    car_id = db.Column(db.Integer, db.ForeignKey(Car.id), primary_key=True)
+    color_id = db.Column(db.Integer, db.ForeignKey(Color.id), primary_key=True)
 
 
 db.init_db()
