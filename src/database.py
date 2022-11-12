@@ -5,6 +5,8 @@ from sqlalchemy.orm import scoped_session, sessionmaker, backref, relation, rela
 from sqlalchemy.ext.declarative import declarative_base
 
 if os.getenv('environment') is None:
+    if not os.path.exists(os.path.join(os.path.abspath(os.curdir), 'instance')):
+        os.mkdir(os.path.join(os.path.abspath(os.curdir), 'instance'))
     base_dir = os.path.join(os.path.abspath(os.curdir), 'instance')
     engine = create_engine(f'sqlite:///{base_dir}/development.db', echo=True)
 
